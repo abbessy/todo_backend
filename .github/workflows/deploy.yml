@@ -1,0 +1,35 @@
+name: Deploy Backend  # Workflow name shown in the GitHub Actions UI
+
+on:
+  push:  # Trigger the workflow on git push events
+    branches:
+      - main  # Only run when pushing to the main branch
+
+jobs:
+  build-and-deploy:  # Job identifier (single job in this workflow)
+    runs-on: ubuntu-latest  # Run the job on the latest Ubuntu GitHub-hosted runner
+
+    steps:
+      - name: Checkout code  # Step label shown in the Actions log
+        uses: actions/checkout@v3  # Pulls your repository code into the runner workspace
+
+      - name: Set up Node  # Step label shown in the Actions log
+        uses: actions/setup-node@v3  # Installs/configures Node.js on the runner
+        with:
+          node-version: 18  # Use Node.js v18
+
+      - name: Install dependencies  # Step label shown in the Actions log
+        run: npm install  # Installs packages from package.json/package-lock.json
+
+      - name: Run tests (optional)  # Step label shown in the Actions log
+        run: npm test  # Runs the project's test script (fails the workflow if tests fail)
+
+      - name: Build Docker image  # Step label shown in the Actions log
+        run: docker build -t todo-backend .  # Builds a Docker image tagged 'todo-backend' from the Dockerfile in the repo root
+
+      - name: Login to Render (via API key)  # Step label shown in the Actions log
+        run: |  # Multi-line shell script
+          curl -X POST \  # Sends an HTTP POST request (used here to trigger a Render deploy)
+          -H "Accept: application/json" \  # Requests a JSON response
+          -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \  # Adds Render API token from GitHub Secrets for auth
+          https://api.render.com/deploy/srv-d5ccud24d50c73fsu41g  # Render deploy endpoint for the specified service ID
