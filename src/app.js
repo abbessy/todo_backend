@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import todoRoutes from "./routes/todos.js"; // 🔴 .js REQUIRED
+import todoRoutes from "./routes/todos.js";
 
 const app = express();
 
@@ -9,4 +9,4 @@ app.use(express.json());
 
 app.use("/api/todos", todoRoutes);
 
-export default app; // 🔴 ESM EXPORT
+export default app; 

@@ -1,38 +1,41 @@
-import { Router } from "express";
+import express from "express";
 import Todo from "../models/Todo.js";
-const router = Router();
-// CREATE
+
+const router = express.Router();
+
+// Get all todos
+router.get("/", async (req, res) => {
+  const todos = await Todo.findAll();
+  res.json(todos);
+});
+
+// Get one todo
+router.get("/:id", async (req, res) => {
+  const todo = await Todo.findByPk(req.params.id);
+  if (!todo) return res.status(404).json({ error: "Not found" });
+  res.json(todo);
+});
+
+// Create
 router.post("/", async (req, res) => {
   const todo = await Todo.create(req.body);
   res.json(todo);
 });
 
-// READ ALL
-router.get("/", async (req, res) => {
-  const todos = await Todo.find();
-  res.json(todos);
-});
-
-// READ BY ID
-router.get("/:id", async (req, res) => {
-  const todo = await Todo.findById(req.params.id);
-  res.json(todo);
-});
-
-// UPDATE
+// Update
 router.put("/:id", async (req, res) => {
-  const todo = await Todo.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    { new: true }
-  );
+  const todo = await Todo.findByPk(req.params.id);
+  if (!todo) return res.status(404).json({ error: "Not found" });
+  await todo.update(req.body);
   res.json(todo);
 });
 
-// DELETE
+// Delete
 router.delete("/:id", async (req, res) => {
-  await Todo.findByIdAndDelete(req.params.id);
-  res.json({ success: true });
+  const todo = await Todo.findByPk(req.params.id);
+  if (!todo) return res.status(404).json({ error: "Not found" });
+  await todo.destroy();
+  res.json({ message: "Deleted" });
 });
 
 export default router;
